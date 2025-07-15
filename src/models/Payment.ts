@@ -1,40 +1,41 @@
-import { Payment as PaymentType, PaymentStatus } from '../types/payment.types';
+import { Payment as PaymentType, RecordType, Status } from '../types/payment.types';
 
 export class Payment implements PaymentType {
-  id: string;
-  amount: number;
-  currency: string;
-  status: PaymentStatus;
-  merchantId: string;
-  customerId: string;
-  createdAt: Date;
-  updatedAt: Date;
+  id: number;
+  total: number;
+  record_type: RecordType;
+  status: Status;
+  create_date: string;
+  modified_date: string;
 
   constructor(data: Partial<PaymentType>) {
-    this.id = data.id || this.generateId();
-    this.amount = data.amount || 0;
-    this.currency = data.currency || 'USD';
-    this.status = data.status || PaymentStatus.PENDING;
-    this.merchantId = data.merchantId || '';
-    this.customerId = data.customerId || '';
-    this.createdAt = data.createdAt || new Date();
-    this.updatedAt = data.updatedAt || new Date();
+    this.id = data.id || 0;
+    this.total = data.total || 0;
+    this.record_type = data.record_type || RecordType.NONE;
+    this.status = data.status || Status.PENDING;
+    this.create_date = data.create_date || this.getCurrentTimestamp();
+    this.modified_date = data.modified_date || this.getCurrentTimestamp();
   }
 
-  private generateId(): string {
-    return Math.random().toString(36).substr(2, 9);
+  // System field automation logic
+  private getCurrentTimestamp(): string {
+    return new Date().toISOString();
   }
 
-  toJSON(): PaymentType {
+  // Auto-update modified_date when updating
+  updateModifiedDate(): void {
+    this.modified_date = this.getCurrentTimestamp();
+  }
+
+  // Convert to PaymentResponse format
+  toResponse(): PaymentType {
     return {
       id: this.id,
-      amount: this.amount,
-      currency: this.currency,
+      total: this.total,
+      record_type: this.record_type,
       status: this.status,
-      merchantId: this.merchantId,
-      customerId: this.customerId,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt
+      create_date: this.create_date,
+      modified_date: this.modified_date
     };
   }
 } 

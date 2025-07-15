@@ -1,13 +1,13 @@
 import sqlite3 from 'sqlite3';
 import path from 'path';
 
-// DB 파일 경로 (루트에 payments.db)
+// DB file path (payments.db in root)
 const dbPath = path.resolve(__dirname, '../../payments.db');
 
-// SQLite DB 인스턴스 (싱글톤)
+// SQLite DB instance (singleton)
 export const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
-    // DB 연결 실패 시 에러 출력
+    // Log error if DB connection fails
     // eslint-disable-next-line no-console
     console.error('Failed to connect to SQLite database:', err.message);
   } else {
@@ -16,7 +16,7 @@ export const db = new sqlite3.Database(dbPath, (err) => {
   }
 });
 
-// 쿼리 실행 (Promise 래핑)
+// Query execution (Promise wrapper)
 export function run(sql: string, params: any[] = []): Promise<void> {
   return new Promise((resolve, reject) => {
     db.run(sql, params, function (err) {

@@ -1,18 +1,19 @@
 import Joi from 'joi';
 import { Request, Response, NextFunction } from 'express';
+import { RecordType, Status } from '../types/payment.types';
 
-// Payment validation schema
+// CreatePaymentDto validation schema
 export const createPaymentSchema = Joi.object({
-  amount: Joi.number().positive().required(),
-  currency: Joi.string().length(3).uppercase().required(),
-  merchantId: Joi.string().required(),
-  customerId: Joi.string().required()
+  total: Joi.number().positive().required(),
+  record_type: Joi.string().valid(...Object.values(RecordType)).required(),
+  status: Joi.string().valid(...Object.values(Status)).required()
 });
 
+// UpdatePaymentDto validation schema
 export const updatePaymentSchema = Joi.object({
-  status: Joi.string().valid('pending', 'processing', 'completed', 'failed', 'cancelled').optional(),
-  amount: Joi.number().positive().optional(),
-  currency: Joi.string().length(3).uppercase().optional()
+  total: Joi.number().positive().optional(),
+  record_type: Joi.string().valid(...Object.values(RecordType)).optional(),
+  status: Joi.string().valid(...Object.values(Status)).optional()
 });
 
 // Validation middleware factory
@@ -36,10 +37,10 @@ export const validate = (schema: Joi.ObjectSchema) => {
 export const validateId = (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
   
-  if (!id || id.trim() === '') {
+  if (!id || isNaN(Number(id))) {
     res.status(400).json({
       success: false,
-      error: 'Payment ID is required'
+      error: 'Valid payment ID is required'
     });
     return;
   }
