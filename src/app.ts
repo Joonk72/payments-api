@@ -3,6 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { PaymentController } from './controllers/PaymentController';
 import { validate, validateId, createPaymentSchema, updatePaymentSchema } from './middleware/validation';
+import { requestLogger, errorLogger } from './middleware/logger';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 
 // Load environment variables
 dotenv.config();
@@ -13,9 +15,10 @@ const PORT = process.env['PORT'] || 3000;
 // Initialize controller
 const paymentController = new PaymentController();
 
-// Middleware
+// Global middleware
 app.use(cors());
 app.use(express.json());
+app.use(requestLogger);
 
 // Basic route
 app.get('/', (_req, res) => {
@@ -46,6 +49,11 @@ app.put('/payments/:id', validateId, validate(updatePaymentSchema), (req, res) =
 app.delete('/payments/:id', validateId, (req, res) => {
   paymentController.deletePayment(req, res);
 });
+
+// Error handling middleware (must be last)
+app.use(notFoundHandler);
+app.use(errorLogger);
+app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {
